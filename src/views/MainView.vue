@@ -13,10 +13,9 @@
         </Drawer>
 
         <div class="h-0">
-            <!-- 动态导入组件等主要功能开发完成再做，这留个注释防止自己过载的脑子忘掉 -->
-            <SettingsDialog />
-            <DeveloperOptionsDialog />
-            <AboutDialog />
+            <SettingsDialog v-if="appStore.getSettingsDialogState" />
+            <DeveloperOptionsDialog v-if="appStore.getDeveloperOptionsDialogState" />
+            <AboutDialog v-if="appStore.getAboutDialogState" />
         </div>
 
     </div>

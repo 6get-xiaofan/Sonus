@@ -73,7 +73,7 @@ watch(
         :align-position="0.1"
         :enable-spring="false"
         ref="playerRef"
-        @line-click="(e) => { playerStore.currentPosition = e.line.getLine().startTime / 1000 }"
+        @line-click="(e) => { playerStore.seek(e.line.getLine().startTime / 1000) }"
     />
 
     <div v-else-if="appStore.rightArea === 'lyrics'" class="no-lyric">
@@ -83,6 +83,8 @@ watch(
 </template>
 
 <style scoped>
+@reference "tailwindcss";
+@reference "@/assets/index.css";
 /* -------------------------- 主歌词与逐字颜色分离设置 -------------------------- */
 /* 1. 所有歌词行基础样式 */
 :deep([class^="lyricLine-"]) {
@@ -104,40 +106,41 @@ watch(
 
 /* 3. 主歌词容器（灰色背景容器） */
 :deep([class^="lyricMainLine-"]) {
-  color: #aaa; /* 主歌词容器灰色（可调整深浅） */
+  @apply text-foreground/70
 }
 :deep([class^="lyricLine-"].active [class^="lyricMainLine-"]) {
    /* 激活行主容器颜色（稍亮灰色） */
+  @apply text-foreground/70
 }
 
 /* 4. 逐字动画字符（黑色） */
 /* 普通行的逐字字符 */
 :deep([class^="lyricMainLine-"] span) {
-  color: #000 !important; /* 逐字字符黑色 */
+  @apply text-foreground
 }
 /* 激活行的逐字字符（可加深黑色或调整为其他颜色） */
 :deep([class^="lyricLine-"].active [class^="lyricMainLine-"] span) {
-  color: #000 !important; /* 激活行逐字字符保持黑色 */
+  @apply text-foreground
 }
 
 /* 5. 强调字符保持黑色 */
 :deep([class^="lyricMainLine-"] .emphasize span) {
-  color: #000 !important;
+  @apply text-foreground
 }
 
 /* 6. 副歌词文本 */
 :deep([class^="lyricSubLine-"]) {
   font-size: 16px;
-  color: #888; /* 副歌词灰色 */
+  @apply text-foreground/70
 }
 :deep([class^="lyricLine-"].active [class^="lyricSubLine-"]) {
-  color: #aaa;
   opacity: 0.8;
+  @apply text-foreground/70
 }
 
 /* 7. 二重唱歌词行 */
 :deep([class^="lyricLine-"][class*="lyricDuetLine-"]) {
-  color: #a8a8ff;
+  @apply text-foreground/70
 }
 
 /* 8. 已模糊的歌词行 */

@@ -4,7 +4,6 @@ use std::{
     sync::{Arc, Mutex},
     time::{Duration, Instant},
 };
-use std::sync::atomic::Ordering;
 use tauri::{AppHandle, Emitter};
 use anyhow::Result;
 use rodio::{OutputStream, OutputStreamBuilder, Sink, Source};
@@ -19,7 +18,7 @@ use symphonia::core::{
     units::{Time},
 };
 
-use crate::core::player::state::{PlaybackState, SharedState, StateSnapshot};
+use crate::core::player::state::{InfoSnapshot, PlaybackState, ProgressSnapshot, SharedState, StateSnapshot};
 
 /// rodio 输出 + sink 生命周期，配合 symphonia 解码与精准 seek。
 pub struct AudioBackend {
@@ -233,23 +232,23 @@ impl ProgressClock {
                 if let Some(total) = s.total_duration() {
                     let pos_now_clamped = pos_now.min(total);
                     s.set_current_position(pos_now_clamped);
-                    let snapshot = StateSnapshot::from(&*s);
-                    ctl2.app_handle.emit("player-state-updated", snapshot)
-                        .unwrap_or_else(|e| eprintln!("player-state-updated emit progress failed: {}", e));
+                    let snapshot = ProgressSnapshot::from(&*s);
+                    ctl2.app_handle.emit("player:progress", snapshot)
+                        .unwrap_or_else(|e| eprintln!("player:progress emit progress failed: {}", e));
 
                     if pos_now_clamped >= total && s.is_playing() {
                         s.set_playback_state(PlaybackState::Stopped);
-                        let snapshot = StateSnapshot::from(&*s);
-                        ctl2.app_handle.emit("player-state-updated", snapshot)
-                            .unwrap_or_else(|e| eprintln!("player-state-updated emit progress end failed: {}", e));
+                        let snapshot = ProgressSnapshot::from(&*s);
+                        ctl2.app_handle.emit("player:progress", snapshot)
+                            .unwrap_or_else(|e| eprintln!("player:progress progress end failed: {}", e));
                         ctl2.app_handle.emit("track-ended", ())
                             .unwrap_or_else(|e| eprintln!("emit track-ended failed: {}", e));
                         ctl2.quit.store(true, Ordering::Relaxed);
                     }
                 } else {
                     s.set_current_position(pos_now);
-                    let snapshot = StateSnapshot::from(&*s);
-                    ctl2.app_handle.emit("player-state-updated", snapshot)
+                    let snapshot = ProgressSnapshot::from(&*s);
+                    ctl2.app_handle.emit("player:progress", snapshot)
                         .unwrap_or_else(|e| eprintln!("player-state-updated emit progress failed: {}", e));
                 }
             }

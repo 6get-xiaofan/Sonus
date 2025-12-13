@@ -96,8 +96,8 @@ impl From<DurationWrapper> for Duration {
 pub struct StateSnapshot {
     pub playback_state: PlaybackState,
     pub volume: f32,
-    pub current_position: u64, // 以毫秒为单位
-    pub total_duration: Option<u64>, // 以毫秒为单位
+    pub current_position: u64,
+    pub total_duration: Option<u64>,
     pub current_file: Option<String>,
     pub current_track: Option<Track>,
     pub current_playlist: Playlist,
@@ -105,6 +105,27 @@ pub struct StateSnapshot {
     pub current_index: Option<usize>,
 }
 
+// Split more detailed state, solve #1
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct ProgressSnapshot {
+    pub current_position: u64,
+    pub total_duration: Option<u64>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct InfoSnapshot {
+    pub playback_state: PlaybackState,
+    pub volume: f32,
+    pub current_file: Option<String>,
+    pub current_track: Option<Track>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct PlaylistSnapshot {
+    pub current_playlist: Playlist,
+    pub current_play_mode: PlayMode,
+    pub current_index: Option<usize>,
+}
 impl From<&PlayerState> for StateSnapshot {
     fn from(state: &PlayerState) -> Self {
         StateSnapshot {
@@ -120,6 +141,37 @@ impl From<&PlayerState> for StateSnapshot {
         }
     }
 }
+
+impl From<&PlayerState> for ProgressSnapshot {
+    fn from(state: &PlayerState) -> Self {
+        ProgressSnapshot {
+            current_position: state.current_position().as_millis() as u64,
+            total_duration: state.total_duration().map(|d| d.as_millis() as u64),
+        }
+    }
+}
+
+impl From<&PlayerState> for InfoSnapshot {
+    fn from(state: &PlayerState) -> Self {
+        InfoSnapshot {
+            playback_state: state.playback_state(),
+            volume: state.volume(),
+            current_file: state.current_file().map(|s| s.to_string()),
+            current_track: state.current_track().map(|t| t.into()),
+        }
+    }
+}
+
+impl From<&PlayerState> for PlaylistSnapshot {
+    fn from(state: &PlayerState) -> Self {
+        PlaylistSnapshot {
+            current_playlist: state.current_playlist().clone(),
+            current_play_mode: state.current_play_mode().into(),
+            current_index: state.current_index(),
+        }
+    }
+}
+
 
 pub type SharedState = Arc<Mutex<PlayerState>>;
 pub fn new_shared_state() -> SharedState { Arc::new(Mutex::new(PlayerState::new())) }

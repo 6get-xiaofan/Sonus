@@ -47,10 +47,6 @@ onMounted(async() => {
   mode.value = 'auto'
   await router.push('/home')
   await setWindowMaterial()
-
-  // 等待3s
-  await new Promise(resolve => setTimeout(resolve, 3000))
-  console.log(appStore.getGlobalBackdropState)
 })
 
 router.afterEach(async () => {

@@ -41,8 +41,7 @@
         </SidebarInset>
       </SidebarProvider>
       <div :class="{ close: !rightAreaState }" class="rightArea w-100 h-full">
-        <!-- 给内容容器添加 overflow-y-auto 和 h-full 确保滚动效果 -->
-        <div class="rightArea-content w-100 h-full transition-transform duration-350 pr-2">
+        <div v-if="rightAreaState" class="rightArea-content w-100 h-full transition-transform duration-350 pr-2">
             <LyricsComponent v-if="rightArea === 'lyrics'"/>
             <PlaylistComponent v-if="rightArea === 'playlist'"/>
         </div>
@@ -195,10 +194,7 @@ const items = [
 ]
 
 
-// 获取appStore实例
 const appStore = useAppStore()
-// const playerStore = usePlayerStore()
-// 通过计算属性获取sidebarState状态
 const sidebarState = computed(() => {
     return appStore.getSidebarState
 })
